@@ -64,6 +64,7 @@ def generate_plots(df):
 # Initialize Dash app
 def init_dashboard():
     app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
     server = app.server
 
     
