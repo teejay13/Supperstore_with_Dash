@@ -5,6 +5,7 @@ from dash import Dash, html, dcc, Output, Input
 from numerize import numerize
 from plotly.subplots import make_subplots
 import plotly.express as px
+from app import app, server
 
 # Data Preparation
 def prepare_data():
