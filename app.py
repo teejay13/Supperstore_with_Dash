@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 import plotly.express as px
 
 # Data Preparation
-df = pd.read_csv('Sample_Superstore.csv')
+df = pd.read_csv('https://raw.githubusercontent.com/teejay13/Supperstore_with_Dash/main/Sample_Superstore.csv')
 df.columns = df.columns.str.replace(" ", "_").str.lower()
 df['order_date'] = pd.to_datetime(df['order_date'])
 df['ship_date'] = pd.to_datetime(df['ship_date'])
@@ -24,7 +24,7 @@ sales_by_date = sales_df.groupby([pd.Grouper(key='order_date', freq='M')])['sale
 sales_by_loc = sales_df.groupby('state')['sales'].sum().reset_index()
 sales_by_segment = sales_df.groupby('segment')['sales'].sum().reset_index()
 sales_by_segment['sales'] = sales_by_segment['sales'].round(1)
-df_states = pd.read_csv('states.csv')
+df_states = pd.read_csv('https://raw.githubusercontent.com/teejay13/Supperstore_with_Dash/main/states.csv')
 df_merge_state = pd.merge(sales_by_loc, df_states[['state', 'abbreviation']], on='state')
 
 # Plots
