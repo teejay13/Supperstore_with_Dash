@@ -6,6 +6,10 @@ from numerize import numerize
 from plotly.subplots import make_subplots
 import plotly.express as px
 
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+server = app.server
+
 # Data Preparation
 def prepare_data():
     df = pd.read_csv('https://raw.githubusercontent.com/teejay13/Supperstore_with_Dash/main/Sample_Superstore.csv')
@@ -63,11 +67,7 @@ def generate_plots(df):
 
 # Initialize Dash app
 def init_dashboard():
-    app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-    server = app.server
-
-    
     sales_line, sales_choro, sales_segment_bar, sales_region_ship = generate_plots(prepare_data())
 
     sales = dbc.Card(
@@ -190,8 +190,8 @@ def init_dashboard():
             className="p-3 bg-light rounded-3",
         )
 
-    if __name__ == '__main__':
-        app.run_server(debug=False)
+if __name__ == '__main__':
+    app.run_server(debug=False)
 
 # Execute main function
 init_dashboard()
