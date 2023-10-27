@@ -163,7 +163,7 @@ def render_page_content(pathname):
                     dbc.Col(dcc.Graph(id="choro-graph",figure=sales_choro), md=6),
                 ]),
                 dbc.Row([
-                    dbc.Col(dcc.Graph(id="cluster-graph",figure=sales_line), md=8),
+                    dbc.Col(dcc.Graph(id="region-segment-graph",figure=sales_region_ship), md=8),
                     dbc.Col(dcc.Graph(id="segment-graph",figure=sales_segment_bar), md=4),
                 ])
             ],
