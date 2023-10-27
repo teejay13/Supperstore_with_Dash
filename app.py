@@ -64,6 +64,10 @@ def generate_plots(df):
 # Initialize Dash app
 def init_dashboard():
     app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+    server = app.server
+
+    
     sales_line, sales_choro, sales_segment_bar, sales_region_ship = generate_plots(prepare_data())
 
     sales = dbc.Card(
@@ -187,7 +191,7 @@ def init_dashboard():
         )
 
     if __name__ == '__main__':
-        app.run_server(debug=True, port=4555)
+        app.run_server(debug=False)
 
 # Execute main function
 init_dashboard()
