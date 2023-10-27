@@ -192,6 +192,5 @@ def init_dashboard():
 
 if __name__ == '__main__':
     app.run_server(debug=False)
-
-# Execute main function
-init_dashboard()
+    # Execute main function
+    init_dashboard()
