@@ -5,3 +5,5 @@ dash-html-components
 dash-table
 gunicorn
 numerize
+pandas
+numpy
