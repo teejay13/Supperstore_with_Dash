@@ -46,14 +46,14 @@ sales_segment_bar.update_layout(yaxis={'categoryorder': 'total ascending'})
 
 Sales_by_ship_mode = sales_df.groupby(['ship_mode', 'region'])['sales'].sum().reset_index()
 ship_mode_classes = ["First Class", "Standard Class", "Second Class", "Same Day"]
-# ship_mode_data = {mode: Sales_by_ship_mode[Sales_by_ship_mode['ship_mode'] == mode] for mode in ship_mode_classes}
+ship_mode_data = {mode: Sales_by_ship_mode[Sales_by_ship_mode['ship_mode'] == mode] for mode in ship_mode_classes}
     
-# # Subplots
-# sales_region_ship = make_subplots(rows=1, cols=4, shared_yaxes=True)
-# for i, mode in enumerate(ship_mode_classes, start=1):
-#     fig = px.bar(ship_mode_data[mode], x="sales", y="region", orientation='h')
-#     sales_region_ship.add_trace(fig['data'][0], row=1, col=i)
-#     sales_region_ship.update_xaxes(title_text=mode, row=1, col=i)
+# Subplots
+sales_region_ship = make_subplots(rows=1, cols=4, shared_yaxes=True)
+for i, mode in enumerate(ship_mode_classes, start=1):
+    fig = px.bar(ship_mode_data[mode], x="sales", y="region", orientation='h')
+    sales_region_ship.add_trace(fig['data'][0], row=1, col=i)
+    sales_region_ship.update_xaxes(title_text=mode, row=1, col=i)
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -155,14 +155,7 @@ def render_page_content(pathname):
                     dbc.Col(quantity, md=3),
                 ]),
                 dbc.Row([
-                    dbc.Col(html.Div([
-                                dcc.Dropdown(
-                                    id='ship-mode-dropdown',
-                                    options=[{'label': mode, 'value': mode} for mode in ship_mode_classes],
-                                    value='First Class'
-                                ),
-                                dcc.Graph(id='sales-bar-chart')
-                            ]), md=6),
+                    dbc.Col(dcc.Graph(id="cluster-graph",figure=sales_line), md=6),
                     dbc.Col(dcc.Graph(id="choro-graph",figure=sales_choro), md=6),
                 ]),
                 dbc.Row([
@@ -186,14 +179,6 @@ def render_page_content(pathname):
         className="p-3 bg-light rounded-3",
     )
 
-@app.callback(
-    Output('sales-bar-chart', 'figure'),
-    [Input('ship-mode-dropdown', 'value')]
-)
-def update_graph(selected_mode):
-    filtered_df = sales_df[sales_df['ship_mode'] == selected_mode]
-    fig = px.bar(filtered_df, x='sales', y='region', orientation='h', title=f"Sales by Region for {selected_mode}")
-    return fig
 
 # def update_graph(path):
 #     if user_input == 'Bar Plot':
