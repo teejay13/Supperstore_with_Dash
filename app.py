@@ -47,16 +47,13 @@ sales_segment_bar.update_layout(yaxis={'categoryorder': 'total ascending'})
 Sales_by_ship_mode = sales_df.groupby(['ship_mode', 'region'])['sales'].sum().reset_index()
 ship_mode_classes = ["First Class", "Standard Class", "Second Class", "Same Day"]
 ship_mode_data = {mode: Sales_by_ship_mode[Sales_by_ship_mode['ship_mode'] == mode] for mode in ship_mode_classes}
-first_class_fig = px.bar(ship_mode_data["First Class"], x="sales", y="region", orientation='h')
-#... similar for other shipping classes
-
+    
 # Subplots
 sales_region_ship = make_subplots(rows=1, cols=4, shared_yaxes=True)
-sales_region_ship.add_trace(first_class_fig['data'][0], row=1, col=1)
-#... similar for other shipping classes
-sales_region_ship_titles = ["First Class", "Standard Class", "Second Class", "Same Day"]
-for i, title in enumerate(sales_region_ship_titles, start=1):
-    sales_region_ship.update_xaxes(title_text=title, row=1, col=i)
+for i, mode in enumerate(ship_mode_classes, start=1):
+    fig = px.bar(ship_mode_data[mode], x="sales", y="region", orientation='h')
+    sales_region_ship.add_trace(fig['data'][0], row=1, col=i)
+    sales_region_ship.update_xaxes(title_text=mode, row=1, col=i)
 
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
@@ -158,7 +155,6 @@ def render_page_content(pathname):
                     dbc.Col(quantity, md=3),
                 ]),
                 dbc.Row([
-                    #dbc.Col(ok, md=6),
                     dbc.Col(dcc.Graph(id="cluster-graph",figure=sales_line), md=6),
                     dbc.Col(dcc.Graph(id="choro-graph",figure=sales_choro), md=6),
                 ]),
