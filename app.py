@@ -6,75 +6,62 @@ from numerize import numerize
 from plotly.subplots import make_subplots
 import plotly.express as px
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-server = app.server
-
-df = pd.read_csv('https://raw.githubusercontent.com/teejay13/Supperstore_with_Dash/main/Sample_Superstore.csv')
-
+# Data Preparation
+df = pd.read_csv('Sample_Superstore.csv')
 df.columns = df.columns.str.replace(" ", "_").str.lower()
-
-df['order_date']=pd.to_datetime(df['order_date'])
-df['ship_date']=pd.to_datetime(df['ship_date'])
+df['order_date'] = pd.to_datetime(df['order_date'])
+df['ship_date'] = pd.to_datetime(df['ship_date'])
 df['quantity'] = df['quantity'].astype(float)
 
-print(df.sample(3))
+# Helper functions
+def gen_total_bans(df, column):
+    return df[column].sum()
 
+# Aggregations
 total_customers = df['customer_id'].agg(['count']).reset_index()
-
-def gen_total_bans(df,column):
-        return df[column].sum()
-
-sales_df = df.copy(deep=True)
-
-sales_df = sales_df.sort_values(by = 'order_date')
-
-sales_by_date=sales_df.groupby([pd.Grouper(key = 'order_date', freq = 'M')])['sales'].sum().reset_index()
-
+sales_df = df.sort_values(by='order_date')
+sales_by_date = sales_df.groupby([pd.Grouper(key='order_date', freq='M')])['sales'].sum().reset_index()
 sales_by_loc = sales_df.groupby('state')['sales'].sum().reset_index()
-
 sales_by_segment = sales_df.groupby('segment')['sales'].sum().reset_index()
 sales_by_segment['sales'] = sales_by_segment['sales'].round(1)
-
 df_states = pd.read_csv('states.csv')
+df_merge_state = pd.merge(sales_by_loc, df_states[['state', 'abbreviation']], on='state')
 
-
-print(sales_by_segment)
-
-
-df_merge_state = pd.merge(
-     sales_by_loc,
-     df_states[['state','abbreviation']],
-     on='state'
-)
-
-sales_line = px.area(sales_by_date, x="order_date", y="sales",title='Sales over Time')
-
+# Plots
+sales_line = px.area(sales_by_date, x="order_date", y="sales", title='Sales over Time')
 sales_choro = px.choropleth(
     data_frame=df_merge_state,
     locationmode='USA-states',
     locations='abbreviation',
     scope="usa",
     color='sales',
-    color_continuous_scale='blues',
-    hover_data=['state', 'sales'],                        
-    labels={'sales':'total sales'})
+    color_continuous_scale=[(0, '#E0F8FF'), (1, '#003366')],
+    hover_data=['state', 'sales'],
+    labels={'sales': 'total sales'}
+)
+Sales_by_Category = sales_df.groupby('category')['sales'].sum().reset_index()
+sales_segment_bar = px.bar(sales_by_segment, x="sales", y="segment", text_auto=True, title="Sales by Segment", orientation='h')
+sales_segment_bar.update_traces(textfont_size=12, textangle=0, textposition="inside")
+sales_segment_bar.update_layout(yaxis={'categoryorder': 'total ascending'})
 
-Sales_by_Category=df.groupby('category')['sales'].sum().reset_index()
+Sales_by_ship_mode = sales_df.groupby(['ship_mode', 'region'])['sales'].sum().reset_index()
+ship_mode_classes = ["First Class", "Standard Class", "Second Class", "Same Day"]
+ship_mode_data = {mode: Sales_by_ship_mode[Sales_by_ship_mode['ship_mode'] == mode] for mode in ship_mode_classes}
+first_class_fig = px.bar(ship_mode_data["First Class"], x="sales", y="region", orientation='h')
+#... similar for other shipping classes
+
+# Subplots
+sales_region_ship = make_subplots(rows=1, cols=4, shared_yaxes=True)
+sales_region_ship.add_trace(first_class_fig['data'][0], row=1, col=1)
+#... similar for other shipping classes
+sales_region_ship_titles = ["First Class", "Standard Class", "Second Class", "Same Day"]
+for i, title in enumerate(sales_region_ship_titles, start=1):
+    sales_region_ship.update_xaxes(title_text=title, row=1, col=i)
 
 
-#fig = px.bar(data_canada, x='year', y='pop')
-# sales_category_pie =px.pie(Sales_by_Category, values='sales', 
-#              names='category', 
-#              hole=0.5, 
-#              color_discrete_sequence=px.colors.qualitative.Pastel)
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-sales_segment_bar = px.bar(sales_by_segment, x="segment", y="sales", text_auto = True,title="Sales by Segment")
-
-sales_segment_bar.update_traces(textfont_size = 12, textangle = 0, textposition = "inside")
-sales_segment_bar.update_yaxes(visible=False)
-
-#sales_category_pie.update_traces(textposition='inside', textinfo='percent+label')
+server = app.server
 
 sales = dbc.Card(
     [
